@@ -1,3 +1,4 @@
+import torch
 from torchvision import transforms
 from utils import *
 from PIL import Image, ImageDraw, ImageFont
