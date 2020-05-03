@@ -206,16 +206,15 @@ if __name__ == '__main__':
             for i in range(det_boxes.size(0)):
                 color = (255, 0, 0)
                 box = det_boxes[i].tolist()
-                a = dist_mat[:, i] < 100:
+                a = dist_mat[:, i] < 100
                 if torch.sum(a.type(torch.ByteTensor)) > 1:
                     color = (0, 0, 255)
                 cv2.rectangle(image, (int(box[0]), int(box[1])), (int(box[2]), int(box[3])), color, thickness)
                 cv2.circle(image, tuple(centers[i,:]), 5, (255, 255, 0), 10)
                 image_2 = cv2.warpPerspective(image, M, (1920, 1080))
 
-
-            cv2.imshow('test', image)
             cv2.imshow('test2', image_2)
+            cv2.imshow('test', image)
             key = cv2.waitKey(1) & 0xFF
             if key & 0xFF == ord('q'):
                 break
