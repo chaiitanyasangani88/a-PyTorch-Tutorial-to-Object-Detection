@@ -4,11 +4,13 @@ import torch.optim
 import torch.utils.data
 from model import SSD300, MultiBoxLoss
 from datasets import PascalVOCDataset, OxfordDataset
+from torch.utils.tensorboard import SummaryWriter
 from utils import *
 
 # Data parameters
 data_folder = './'  # folder with data files
 keep_difficult = True  # use objects considered difficult to detect?
+writer = SummaryWriter('runs/experiment_2')
 
 # Model parameters
 # Not too many here since the SSD300 has a very specific structure
@@ -154,6 +156,11 @@ def train(train_loader, model, criterion, optimizer, epoch, epochs):
                   'Loss {loss.val:.4f} ({loss.avg:.4f})\t'.format(epoch, i, len(train_loader), epochs,
                                                                   batch_time=batch_time,
                                                                   data_time=data_time, loss=losses))
+            writer.add_scalar('training_loss val vs epoch', losses.val, epoch)
+            writer.add_scalar('training_loss val vs time', losses.val, batch_time)
+            writer.add_scalar('training_loss avg vs epoch', losses.avg, epoch)
+            writer.add_scalar('training_loss avg vs time', losses.avg, batch_time)
+
     del predicted_locs, predicted_scores, images, boxes, labels  # free some memory since their histories may be stored
 
 
