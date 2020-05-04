@@ -141,29 +141,30 @@ def detect(original_image, min_score, max_overlap, top_k, suppress=None):
 if __name__ == '__main__':
 
     video_path = 'oxford_dataset/TownCentreXVID.avi'
-    rect = np.array([[739, 119], [990, 148], [614, 523], [229, 437]], np.float32)
+    is_warp = True
+    if is_warp:
+        rect = np.array([[739, 119], [990, 148], [614, 523], [229, 437]], np.float32)
 
-    (tl, tr, br, bl) = rect
-    widthA = np.sqrt(((br[0] - bl[0]) ** 2) + ((br[1] - bl[1]) ** 2))
-    widthB = np.sqrt(((tr[0] - tl[0]) ** 2) + ((tr[1] - tl[1]) ** 2))
-    # ...and now for the height of our new image
-    heightA = np.sqrt(((tr[0] - br[0]) ** 2) + ((tr[1] - br[1]) ** 2))
-    heightB = np.sqrt(((tl[0] - bl[0]) ** 2) + ((tl[1] - bl[1]) ** 2))
-    # take the maximum of the width and height values to reach
-    # our final dimensions
-    maxWidth = max(int(widthA), int(widthB))
-    maxHeight = max(int(heightA), int(heightB))
-    # construct our destination points which will be used to
-    # map the screen to a top-down, "birds eye" view
-    dst = np.array([
-        [0, 0],
-        [maxWidth - 1, 0],
-        [maxWidth - 1, maxHeight - 1],
-        [0, maxHeight - 1]], dtype="float32")
-    # calculate the perspective transform matrix and warp
-    # the perspective to grab the screen
-    M = cv2.getPerspectiveTransform(rect, dst)
-
+        (tl, tr, br, bl) = rect
+        widthA = np.sqrt(((br[0] - bl[0]) ** 2) + ((br[1] - bl[1]) ** 2))
+        widthB = np.sqrt(((tr[0] - tl[0]) ** 2) + ((tr[1] - tl[1]) ** 2))
+        # ...and now for the height of our new image
+        heightA = np.sqrt(((tr[0] - br[0]) ** 2) + ((tr[1] - br[1]) ** 2))
+        heightB = np.sqrt(((tl[0] - bl[0]) ** 2) + ((tl[1] - bl[1]) ** 2))
+        # take the maximum of the width and height values to reach
+        # our final dimensions
+        maxWidth = max(int(widthA), int(widthB))
+        maxHeight = max(int(heightA), int(heightB))
+        # construct our destination points which will be used to
+        # map the screen to a top-down, "birds eye" view
+        dst = np.array([
+            [0, 0],
+            [maxWidth - 1, 0],
+            [maxWidth - 1, maxHeight - 1],
+            [0, maxHeight - 1]], dtype="float32")
+        # calculate the perspective transform matrix and warp
+        # the perspective to grab the screen
+        M = cv2.getPerspectiveTransform(rect, dst)
 
     # video_path ='oxford_dataset/Dataset2.mp4'
     vc = cv2.VideoCapture(video_path)
@@ -185,7 +186,7 @@ if __name__ == '__main__':
             # original_image = Image.open(img_path, mode='r')
             original_image = im_pil.convert('RGB')
             start = time.time()
-            det_boxes, det_labels, det_scores = get_boxes_labels(original_image, min_score=0.3, max_overlap=0.4, top_k=100)
+            det_boxes, det_labels, det_scores = get_boxes_labels(original_image, min_score=0.4, max_overlap=0.3, top_k=100)
             time_taken = time.time() - start
             print(time_taken)
 
@@ -211,9 +212,11 @@ if __name__ == '__main__':
                     color = (0, 0, 255)
                 cv2.rectangle(image, (int(box[0]), int(box[1])), (int(box[2]), int(box[3])), color, thickness)
                 cv2.circle(image, tuple(centers[i,:]), 5, (255, 255, 0), 10)
-                image_2 = cv2.warpPerspective(image, M, (1920, 1080))
 
-            cv2.imshow('test2', image_2)
+            if is_warp:
+                image_2 = cv2.warpPerspective(image, M, (1920, 1080))
+                cv2.imshow('test2', image_2)
+
             cv2.imshow('test', image)
             key = cv2.waitKey(1) & 0xFF
             if key & 0xFF == ord('q'):
